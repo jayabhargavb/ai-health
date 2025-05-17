@@ -1,6 +1,6 @@
-# HealthAssistAI Setup Guide
+# HealthAssist Setup Guide
 
-This guide will help you set up and run both the frontend and backend components of HealthAssistAI.
+This guide will help you set up and run both the frontend and backend components of HealthAssist.
 
 ## Prerequisites
 
@@ -13,13 +13,13 @@ This guide will help you set up and run both the frontend and backend components
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-repo/health-assist-ai.git
-   cd health-assist-ai
+   git clone https://github.com/your-repo/health-assist.git
+   cd health-assist
    ```
 
 2. Install frontend dependencies:
    ```
-   cd HealthAssistAI
+   cd HealthAssist
    npm install
    ```
 
@@ -85,7 +85,7 @@ To make sure everything is working:
 3. Add a symptom using the input form
 4. Tap "Analyze Symptoms"
 5. You should see the analysis screen with the loading animation
-6. After a short time, results should appear from the OpenRouter LLM analysis
+6. After a short time, results should appear from the analysis
 
 ## Troubleshooting
 
@@ -98,6 +98,6 @@ To make sure everything is working:
 
 The backend uses:
 - Express.js for the server
-- OpenRouter API to access Llama 3.3 8B model
+- OpenRouter API to access advanced language models
 - Zod for request validation
 - Custom prompt templates for medical analysis 

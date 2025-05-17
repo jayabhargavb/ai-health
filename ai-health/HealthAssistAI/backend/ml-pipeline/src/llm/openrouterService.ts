@@ -34,14 +34,14 @@ export interface ErrorResult {
 
 export type AnalyzeSymptomsResult = LLMOutput | ErrorResult;
 
-// Load API key from environment variables
+// api config
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY;
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
-// Use any model from OpenRouter
+// model selection
 const MODEL = "openai/gpt-4.1-nano"; 
 
-// Initialize OpenAI client with OpenRouter settings
+// init client
 const openai = new OpenAI({
   apiKey: OPENROUTER_API_KEY,
   baseURL: OPENROUTER_BASE_URL,
@@ -77,7 +77,7 @@ function validateLLMOutput(output: any): { valid: boolean; error?: string } {
 }
 
 function extractFirstJsonObject(text: string): string | null {
-  // Try to find a JSON object between curly braces using regex
+  // find json with regex
   const jsonRegex = /\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\}))*\}))*\}/g;
   const matches = text.match(jsonRegex);
   
@@ -85,7 +85,7 @@ function extractFirstJsonObject(text: string): string | null {
     return matches[0];
   }
   
-  // If regex fails, try a simpler approach to find the outermost braces
+  // fallback approach
   const firstBrace = text.indexOf('{');
   const lastBrace = text.lastIndexOf('}');
   
@@ -97,13 +97,13 @@ function extractFirstJsonObject(text: string): string | null {
 }
 
 export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayload): Promise<AnalyzeSymptomsResult> {
-  // Validate input
+  // validate input
   const validation = validatePayload(payload);
   if (!validation.valid) {
     return { error: validation.error || 'Invalid input', status: 400 };
   }
   
-  // Check if we have an API key
+  // check api key
   if (!OPENROUTER_API_KEY) {
     console.error('OpenRouter API key is not configured');
     return { 
@@ -112,11 +112,11 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
     };
   }
   
-  // Log API key format - this helps debug without revealing the whole key
+  // debug key format
   console.log(`API key format check: ${OPENROUTER_API_KEY.substring(0, 6)}...${OPENROUTER_API_KEY.length} chars`);
   console.log('Expected format: sk-or-...');
   
-  // Build the prompt 
+  // create prompt
   const prompt = buildSymptomPrompt(payload.symptoms, payload.context?.age, payload.context?.gender);
   console.log('Sending prompt to OpenRouter:', prompt.substring(0, 100) + '...');
   console.log('Full prompt length:', prompt.length);
@@ -124,7 +124,7 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
   try {
     console.log('Making OpenRouter API call using OpenAI SDK...');
     
-    // Make the API call using OpenAI SDK
+    // api call
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
@@ -137,7 +137,7 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
     console.log('OpenAI SDK response received');
     console.log('Response object keys:', Object.keys(response).join(', '));
     
-    // Log full response for debugging
+    // debug response
     console.log('Full response:', JSON.stringify(response, null, 2));
     
     if ('error' in response) {
@@ -149,7 +149,7 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
       };
     }
     
-    // Process the response content
+    // get content
     const content = response.choices?.[0]?.message?.content;
     if (!content) {
       console.error('No content in response');
@@ -162,7 +162,7 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
     
     console.log('OpenRouter raw response (first 200 chars):', content.substring(0, 200));
     
-    // Additional debugging for common issues
+    // check for choices
     if (!response.choices || response.choices.length === 0) {
       console.error('No choices in response');
       return {
@@ -172,7 +172,7 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
       };
     }
     
-    // Check if we can find valid JSON in the response
+    // check for empty content
     if (content.trim() === '') {
       console.error('Empty response content');
       return {
@@ -182,12 +182,12 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
       };
     }
     
-    // Attempt to parse JSON
+    // parse json
     try {
       const parsed = JSON.parse(content);
       console.log('JSON parse successful. Keys:', Object.keys(parsed).join(', '));
       
-      // Validate response format
+      // validate format
       if (!Array.isArray(parsed.possibleConditions)) {
         console.error('Missing possibleConditions array');
         return { 
@@ -197,52 +197,37 @@ export async function analyzeSymptomsWithOpenRouter(payload: AnalyzeSymptomsPayl
         };
       }
       
-      // Success! Return the parsed response
-      console.log('Analysis successful! Found', parsed.possibleConditions.length, 'conditions');
+      // success!
       return parsed;
-    } catch (parseError) {
-      console.error('Failed to parse JSON response:', parseError);
-      console.log('Raw response type:', typeof content);
-      console.log('First 20 chars:', content.substring(0, 20));
-      console.log('Last 20 chars:', content.substring(content.length - 20));
+    } catch (jsonError) {
+      console.error('Failed to parse JSON response:', jsonError);
       
-      // Try to extract a JSON object if it exists in the text
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        console.log('Found potential JSON object in response');
+      // extract json if possible
+      const extractedJson = extractFirstJsonObject(content);
+      if (extractedJson) {
         try {
-          const extractedJson = JSON.parse(jsonMatch[0]);
-          console.log('Successfully parsed extracted JSON');
-          return extractedJson;
-        } catch(e) {
-          console.error('Failed to parse extracted JSON');
+          const extracted = JSON.parse(extractedJson);
+          console.log('Extracted JSON from response');
+          return extracted;
+        } catch (extractError) {
+          console.error('Failed to parse extracted JSON:', extractError);
         }
       }
       
-      return { 
-        error: 'Failed to parse LLM response as JSON',
-        status: 502,
-        raw: content.substring(0, 300) 
-      };
-    }
-  } catch (error: any) {
-    console.error('OpenRouter API error:', error.message);
-    
-    // Provide detailed error information
-    if (error.response) {
-      console.error('API response error status:', error.response.status);
-      console.error('API response error data:', JSON.stringify(error.response.data));
-      
+      // detailed error
       return {
-        error: `OpenRouter API error: ${error.response.status} - ${error.response.data?.error?.message || error.message}`,
-        status: error.response.status,
-        details: error.response.data
+        error: 'Failed to parse response from OpenRouter',
+        status: 502,
+        raw: content.substring(0, 500),
+        details: String(jsonError)
       };
     }
-    
-    return { 
-      error: `OpenRouter API error: ${error.message}`,
-      status: 500 
+  } catch (error) {
+    console.error('OpenRouter API call failed:', error);
+    return {
+      error: `OpenRouter API call failed: ${error instanceof Error ? error.message : String(error)}`,
+      status: 502,
+      details: error instanceof Error ? error.stack : undefined
     };
   }
 }

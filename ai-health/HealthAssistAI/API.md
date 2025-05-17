@@ -1,6 +1,6 @@
 # API Documentation
 
-<!-- describes the main API endpoints for HealthAssist AI -->
+<!-- describes the main API endpoints for HealthAssist -->
 
 ## Auth
 - `POST /api/auth/login` — user login

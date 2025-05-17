@@ -1,6 +1,6 @@
 # Architecture Overview
 
-<!-- describes the high-level architecture of HealthAssist AI -->
+<!-- describes the high-level architecture of HealthAssist -->
 
 ## Frontend (React Native/Expo)
 - Modular components (cards, forms, common)
@@ -15,11 +15,11 @@
 - Connects to ML pipeline for analysis
 
 ## ML Pipeline (Python)
-- Handles symptom analysis and LLM integration
+- Handles symptom analysis and model integration
 - Exposes endpoints for analysis
 
 ## Testing
-- Unit, integration, E2E, and DeepEval tests
+- Unit, integration, E2E tests
 - Jest, React Native Testing Library, Detox
 
 ## DevOps

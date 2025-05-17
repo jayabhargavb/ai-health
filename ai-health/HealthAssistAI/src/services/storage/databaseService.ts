@@ -6,31 +6,31 @@ const SYMPTOM_TABLE = 'symptom_checks';
 const USER_TABLE = 'users';
 const PROFILE_TABLE = 'user_profiles';
 
-// Safely access the database with type protection
-// Use the appropriate method based on the available API
+// db access with type protection
+// using appropriate method based on api
 let db: any;
 
-// For Expo SQLite version 11.0.0 and above, createDatabaseAsync is used
+// for newer expo sqlite
 if ('createDatabaseAsync' in SQLite) {
   (async () => {
     try {
-      // @ts-ignore - Handle newer Expo SQLite API
+      // @ts-ignore - newer api
       db = await SQLite.createDatabaseAsync(DB_NAME);
     } catch (error) {
       console.error('Failed to create database:', error);
     }
   })();
 } else {
-  // For older versions, use openDatabase
+  // for older versions
   try {
-    // @ts-ignore - Handle older Expo SQLite API
+    // @ts-ignore - older api
     db = SQLite.openDatabase(DB_NAME);
   } catch (error) {
     console.error('Failed to open database:', error);
     
-    // Final fallback attempt
+    // fallback attempt
     try {
-      // @ts-ignore - Last resort for compatibility
+      // @ts-ignore - last resort
       db = (SQLite as any).default.openDatabase(DB_NAME);
     } catch (e) {
       console.error('All database connection methods failed:', e);
@@ -38,13 +38,13 @@ if ('createDatabaseAsync' in SQLite) {
   }
 }
 
-// Ensure database operations don't proceed until db is initialized
+// wait for db init
 const ensureDatabase = (): Promise<any> => {
   return new Promise((resolve, reject) => {
     if (db) {
       resolve(db);
     } else {
-      // Wait up to 5 seconds for database to initialize
+      // try for 5 seconds
       let attempts = 0;
       const checkInterval = setInterval(() => {
         attempts++;

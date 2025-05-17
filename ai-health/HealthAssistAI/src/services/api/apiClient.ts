@@ -6,39 +6,34 @@ import { Platform } from 'react-native';
 
 let authToken: string | null = null;
 
-/**
- * Set the auth token for future requests
- */
+// set auth token
 export const setAuthToken = (token: string | null) => {
   authToken = token;
 };
 
-/**
- * Axios instance with interceptors
- */
+// axios instance
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
   },
-  // Set to false to avoid hanging on failed requests
-  // This will throw faster when server is unreachable
+  // avoid hanging on failures
   validateStatus: (status) => status >= 200 && status < 500
 });
 
-// Synchronous request interceptor: attach token if available
+// add token to requests
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (authToken && config.headers) {
       config.headers.Authorization = `Bearer ${authToken}`;
     }
     
-    // Add device info to request headers
+    // add device info
     config.headers['X-Platform'] = Platform.OS;
     config.headers['X-Platform-Version'] = Platform.Version.toString();
     
-    // Ensure timeout is set to prevent hanging
+    // set timeout
     if (!config.timeout) {
       config.timeout = API_TIMEOUT;
     }
@@ -48,11 +43,11 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: handle errors
+// handle response errors
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    // Handle axios cancelation/timeout errors differently
+  (error: any) => {
+    // handle cancellation
     if (axios.isCancel(error)) {
       return Promise.reject({
         status: 408,
@@ -61,9 +56,9 @@ apiClient.interceptors.response.use(
       } as ApiError);
     }
 
-    // Network or timeout errors
+    // network errors
     if (!error.response) {
-      // If the error contains a message with 'timeout' in it, it's a timeout
+      // timeout check
       if (error.message?.toLowerCase().includes('timeout')) {
         return Promise.reject({
           status: 408,
@@ -72,7 +67,7 @@ apiClient.interceptors.response.use(
         } as ApiError);
       }
 
-      // Other network errors
+      // other network issues
       return Promise.reject({
         status: 0,
         message: 'Network error. Please check your connection.',
@@ -80,24 +75,23 @@ apiClient.interceptors.response.use(
       } as ApiError);
     }
     
-    // Server errors
-    let apiError: ApiError = {
-      status: error.response?.status || 500,
+    // server errors
+    const apiError: ApiError = {
+      status: error.response.status || 500,
       message: error.message,
-      code: error.code,
-      details: error.response?.data,
+      code: error.code as string,
+      details: error.response.data,
     };
     
-    // Try to extract fallbackResult from the error response if available
-    if (error.response?.data?.fallbackResult) {
+    // extract fallback result
+    if (error.response.data?.fallbackResult) {
       apiError.fallbackResult = error.response.data.fallbackResult;
     }
     
-    // Customize error message based on status code
+    // customize error messages
     switch (apiError.status) {
       case 401:
         apiError.message = 'Authentication required. Please log in again.';
-        // Handle token expiration - could automatically trigger refresh
         break;
       case 403:
         apiError.message = 'You do not have permission to access this resource.';

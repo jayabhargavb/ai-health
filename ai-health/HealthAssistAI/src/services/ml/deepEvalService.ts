@@ -1,4 +1,4 @@
-// provides deep evaluation utilities for LLM/ML outputs
+// evaluation utilities for ml outputs
 
 import apiClient from '../api/apiClient';
 
@@ -11,9 +11,9 @@ export interface EvaluationResult {
 }
 
 /**
- * Evaluates LLM response quality using DeepEval metrics
- * @param promptText The original prompt sent to the LLM
- * @param responseText The LLM response to evaluate
+ * Evaluates response quality using metrics
+ * @param promptText The original prompt sent to the model
+ * @param responseText The response to evaluate
  * @param referenceData Optional reference data for factual verification
  */
 export async function evaluateLLMResponse(
@@ -22,7 +22,7 @@ export async function evaluateLLMResponse(
   referenceData?: string
 ): Promise<EvaluationResult> {
   try {
-    // In production, this would call the actual DeepEval API
+    // mock api call
     const { data } = await apiClient.post('/api/evaluate/llm', {
       prompt: promptText,
       response: responseText,
@@ -39,28 +39,25 @@ export async function evaluateLLMResponse(
   } catch (error) {
     console.error('Error evaluating LLM response:', error);
     
-    // Fallback to basic heuristics if API call fails
+    // fallback to basic checks
     return fallbackEvaluation(responseText);
   }
 }
 
-/**
- * Simple fallback evaluation using basic heuristics
- */
 function fallbackEvaluation(responseText: string): EvaluationResult {
-  // Check if response is too short
+  // check length
   const isTooShort = responseText.length < 50;
   
-  // Check if response contains medical-related keywords
+  // check keywords
   const hasMedicalTerms = /symptom|condition|diagnosis|treatment|health|medical|doctor/i.test(responseText);
   
-  // Check for disclaimer/uncertainty words
+  // check disclaimer
   const hasDisclaimer = /consult|professional|not medical advice|disclaimer/i.test(responseText);
   
-  // Calculate basic relevance score
+  // calc relevance
   const relevance = hasMedicalTerms ? 0.85 : 0.5;
   
-  // Calculate basic faithfulness score
+  // calc faithfulness
   const faithfulness = hasDisclaimer ? 0.9 : 0.7;
   
   return {

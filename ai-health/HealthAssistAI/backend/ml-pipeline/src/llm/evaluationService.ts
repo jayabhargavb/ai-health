@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 /**
- * Evaluation result structure for LLM responses
+ * Evaluation result structure for responses
  */
 export interface EvaluationMetrics {
   relevance: number;
@@ -11,13 +11,9 @@ export interface EvaluationMetrics {
 }
 
 /**
- * Evaluates an LLM response using DeepEval metrics
  * 
- * In a production environment, this would integrate with
- * the DeepEval library directly or via API
- * 
- * @param prompt The original prompt sent to the LLM
- * @param response The LLM response to evaluate
+ * @param prompt The original prompt
+ * @param response The response to evaluate
  * @param reference Optional reference data for fact-checking
  */
 export async function evaluateLLMResponse(
@@ -25,24 +21,23 @@ export async function evaluateLLMResponse(
   response: string, 
   reference?: string
 ): Promise<EvaluationMetrics> {
-  // For demo purposes, we're using a placeholder implementation
-  // In production, you would use the DeepEval library or API:
-  // import { Evaluator, FactualConsistencyMetric, BiasMetric, ToxicityMetric } from 'deepeval';
+  // demo implementation
+  // real version would use evaluation library
   
   try {
-    // Mock DeepEval API response with some simulated processing time
+    // mock response with delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Check if we're evaluating a medical response
+    // check context
     const isMedicalContext = /symptom|diagnosis|medical|health|treatment|condition/i.test(prompt);
     
-    // Basic heuristics for medical content
+    // basic checks
     const hasDisclaimer = /consult|professional|not medical advice|disclaimer/i.test(response);
     const mentionsSources = /study|research|evidence|journal|published/i.test(response);
     const usesUncertainty = /may|might|could|possibly|potentially|suggests/i.test(response);
     const containsJargon = /acute|chronic|pathology|etiology|contraindication|differential/i.test(response);
     
-    // Calculated metrics
+    // metrics calc
     let relevance = response.length > 100 ? 0.85 : 0.6;
     relevance *= isMedicalContext ? 1.1 : 0.9;
     relevance = Math.min(relevance, 1.0);
@@ -64,7 +59,7 @@ export async function evaluateLLMResponse(
     };
   } catch (error: any) {
     console.error('Error in LLM evaluation:', error);
-    // Return conservative values if evaluation fails
+    // fallback values
     return {
       relevance: 0.7,
       faithfulness: 0.7,

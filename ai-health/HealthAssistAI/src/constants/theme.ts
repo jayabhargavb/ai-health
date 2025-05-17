@@ -3,27 +3,27 @@
  */
 export const theme = {
   colors: {
-    primary: '#01B577',     // Vibrant green - slightly adjusted from original
-    primaryDark: '#019F69', // Darker shade for pressed states
-    primaryLight: '#E7F9F0', // Light tint for backgrounds
-    secondary: '#1F2937',   // Dark blue-gray for secondary elements
-    background: '#FFFFFF',  // Clean white
-    surface: '#F9FAFB',     // Subtle off-white for cards
-    error: '#EF4444',       // Red for errors
-    warning: '#F59E0B',     // Amber for warnings
-    success: '#10B981',     // Emerald for success states
-    info: '#3B82F6',        // Blue for informational elements
+    primary: '#01B577',     // vibrant green
+    primaryDark: '#019F69', // darker shade
+    primaryLight: '#E7F9F0', // light tint
+    secondary: '#1F2937',   // dark blue-gray
+    background: '#FFFFFF',  // white
+    surface: '#F9FAFB',     // off-white
+    error: '#EF4444',       // red
+    warning: '#F59E0B',     // amber
+    success: '#10B981',     // emerald
+    info: '#3B82F6',        // blue
     text: {
-      primary: '#1F2937',   // Dark blue-gray for primary text
-      secondary: '#6B7280', // Gray for secondary text
-      tertiary: '#9CA3AF',  // Light gray for tertiary text
-      inverse: '#FFFFFF',   // White for text on dark backgrounds
-      link: '#2563EB',      // Blue for links
+      primary: '#1F2937',   // dark text
+      secondary: '#6B7280', // gray text
+      tertiary: '#9CA3AF',  // light gray
+      inverse: '#FFFFFF',   // white text
+      link: '#2563EB',      // blue link
     },
     border: {
-      light: '#E5E7EB',     // Light gray for subtle borders
-      default: '#D1D5DB',   // Medium gray for default borders
-      dark: '#9CA3AF',      // Dark gray for prominent borders
+      light: '#E5E7EB',     // light border
+      default: '#D1D5DB',   // medium border
+      dark: '#9CA3AF',      // dark border
     },
   },
   spacing: {
