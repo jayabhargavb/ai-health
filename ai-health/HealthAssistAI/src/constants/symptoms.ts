@@ -1,0 +1,22 @@
+// list of common symptoms for the symptom checker
+export const SYMPTOMS = [
+  'Cough',
+  'Fever',
+  'Headache',
+  'Sore throat',
+  'Fatigue',
+  'Shortness of breath',
+  'Nausea',
+  'Vomiting',
+  'Diarrhea',
+  'Muscle pain',
+  'Loss of taste',
+  'Loss of smell',
+  'Chest pain',
+  'Dizziness',
+  'Rash',
+  'Runny nose',
+  'Congestion',
+  'Chills',
+  'Sweating',
+];
